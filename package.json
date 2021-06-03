@@ -1,0 +1,19 @@
+{
+  "name": "bank-account-toy",
+  "version": "0.1.0",
+  "description": "A simple bank account toy app for exercise purposes.",
+  "scripts": {
+    "test": "CI=true npm run --prefix client test",
+    "validate": "npm run --prefix client validate"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vitorvanacor/bank-account-toy.git"
+  },
+  "author": "Vitor Vanacor",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vitorvanacor/bank-account-toy/issues"
+  },
+  "homepage": "https://github.com/vitorvanacor/bank-account-toy#readme"
+}
