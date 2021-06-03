@@ -9,3 +9,14 @@ services:
     stdin_open: true
     volumes:
       - ./client:/app
+
+  test:
+    container_name: client_test
+    build:
+      context: ./client
+    stdin_open: true
+    volumes:
+      - ./client:/app
+    environment:
+      - CI=true
+    command: npm test
