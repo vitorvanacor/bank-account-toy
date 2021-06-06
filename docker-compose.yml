@@ -1,5 +1,15 @@
 version: '3'
 services:
+  server:
+    container_name: server
+    build:
+      context: ./server
+    ports:
+      - 8080:8080
+    stdin_open: true
+    volumes:
+      - ./server:/app
+
   client:
     container_name: client
     build:
