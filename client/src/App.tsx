@@ -1,34 +1,62 @@
-import { useState } from "react";
+import { useQuery, QueryKey } from "react-query";
 
-function App() {
-  const [balance, setBalance] = useState(0);
-  const [depositAmount, setDepositAmount] = useState(0);
+import {
+  getHistory,
+  useWithdraw,
+  useDeposit,
+  usePayment,
+} from "./api";
+import Deposit from "./components/Deposit";
+import Withdraw from "./components/Withdraw";
+import TransactionList from "./components/TransactionList";
+import { TransactionHistory } from "./Transaction/Transaction";
+import Balance from "./components/Balance";
+import Payment from "./components/Payment";
+
+const placeholder: TransactionHistory = {
+  username: "",
+  balance: 0,
+  transactions: [],
+};
+
+export default function App() {
+  const username = "josh";
+  const queryKey: QueryKey = ["transactions", username];
+  const { data: history } = useQuery<TransactionHistory, Error>(
+    queryKey,
+    () => getHistory(username),
+    { placeholderData: placeholder }
+  );
+
+  const depositMutation = useDeposit(queryKey);
+  const withdrawMutation = useWithdraw(queryKey);
+  const paymentMutation = usePayment(queryKey);
 
   return (
     <>
-      <h1>Bank Account</h1>
+      <h1>{username.toLocaleUpperCase()}'s Account</h1>
 
-      <h2>Current Balance</h2>
-      <h2 data-testid="balance" style={{ textAlign: "center" }}>
-        {new Intl.NumberFormat("pt-BR", {
-          style: "currency",
-          currency: "BRL",
-        }).format(balance)}
-      </h2>
+      <Balance balance={history?.balance} />
       <hr />
-
-      <label htmlFor="deposit">Deposit to account</label>
-      <input
-        id="deposit"
-        value={depositAmount}
-        onChange={(e) => setDepositAmount(parseInt(e.target.value))}
+      <div className="flex">
+      <Deposit
+        mutate={depositMutation.mutate}
+        username={username}
+        disabled={depositMutation.isLoading}
       />
-      <button onClick={() => setBalance(balance + depositAmount)}>
-        Deposit
-      </button>
+      <Withdraw
+        mutate={withdrawMutation.mutate}
+        username={username}
+        disabled={withdrawMutation.isLoading}
+      /></div>      
       <hr />
+      <Payment
+        mutate={paymentMutation.mutate}
+        username={username}
+        disabled={paymentMutation.isLoading}
+      />      
+      <hr />
+      <TransactionList transactions={history ? history.transactions : []} />
     </>
   );
 }
-
-export default App;

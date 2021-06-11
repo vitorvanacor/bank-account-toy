@@ -6,3 +6,32 @@ html {
 *, *:before, *:after {
   box-sizing: inherit;
 }
+
+/* Remove default bullets */
+ul { list-style: none; }
+
+/* flex */
+.flex {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* loading spinner */
+.spinner {
+  content: '';
+  box-sizing: border-box;
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  margin-left: -10px;
+  border-radius: 50%;
+  border-top: 2px solid white;
+  border-right: 2px solid transparent;
+  animation: spinner 1s ease infinite;
+}
+
+@keyframes spinner {
+  to {transform: rotate(360deg);}
+}
+ 
