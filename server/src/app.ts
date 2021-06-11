@@ -1,37 +1,33 @@
-import express, { Application } from "express";
-import morgan from "morgan";
+import express, { Application, Request, Response } from "express";
+import morganBody from "morgan-body";
 
-import Transaction from "./Transaction/Transaction";
-import { client } from "./lib/db";
+import * as db from "./lib/db";
+import config from "./config";
 
-const PORT = process.env.PORT || 8080;
+import { postDeposit, postWithdraw, getHistory, postPayment } from "./Transaction";
+import {UserRepository, getUsers, postUser} from "./User";
 
 const app: Application = express();
 
 app.use(express.json());
-app.use(morgan("dev"));
+morganBody(app);
 
 // ### Routes
-let i = 0;
-app.get("/", async (req, res) => {
-  return res.send(`pong ${i++}`);
-});
 
-app.post("/deposit", async (req, res) => {
-  const { amount } = req.body;
-});
+app.get("/history", getHistory);
+app.post("/deposit", postDeposit);
+app.post("/withdraw", postWithdraw);
+app.post("/payment", postPayment);
 
-// ### Functions
+app.post("/users", postUser);
+app.get("/users", getUsers);
 
-function calculateBalance(transactions: Array<Transaction>) {
-  let balance = 0;
-  transactions.forEach((transaction) => {
-    balance += transaction.centsAmount;
+export async function runServer(port = config.PORT) {
+  await db.client.connect();
+  await UserRepository.setup();
+  return app.listen(port, () => {
+    console.log("Server is listening on port", port);
   });
-  return balance;
 }
 
-app.listen(PORT, async () => {
-  await client.connect();
-  console.log("Server is running on port", PORT);
-});
+export default app;

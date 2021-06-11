@@ -1,59 +1,85 @@
-//import {dbCliente} = "client"
+import { UserAccount } from "../User/User";
 
-interface DepositProps {
-  username: string;
-  amount: string;
+type TransactionKind = "DEPOSIT" | "WITHDRAWAL" | "PAYMENT";
+
+type TransactionBase = {
+  kind: TransactionKind;
+  // TODO: Use a Money ValueObject instead of number
+  centsAmount: number;
+  createdAt: Date;
+};
+
+export interface Deposit extends TransactionBase {
+  kind: "DEPOSIT";
+  destination: UserAccount;
 }
 
-enum TransactionType {
-  Deposit = "DEPOSIT",
-  Withdraw = "DOWN",
-  Payment = "PAYMENT",
+export interface Withdrawal extends TransactionBase {
+  kind: "WITHDRAWAL";
+  source: UserAccount;
 }
 
-export default class Transaction {
-  readonly type: TransactionType;
-  readonly centsAmount: number;
-  readonly source?: string;
-  readonly destination?: string;
-  readonly description?: string;
-  readonly createdAt: Date;
+export interface Payment extends TransactionBase {
+  kind: "PAYMENT";
+  source: UserAccount;
+  destination: UserAccount;
+  description: string;
+}
 
-  public static transactions: Array<Transaction> = [];
+export type Transaction = Deposit | Withdrawal | Payment;
 
-  public static makeDeposit(props: DepositProps) {
-    return new Transaction(
-      TransactionType.Deposit,
-      parseInt(props.amount),
-      undefined,
-      props.username
+export function makeDeposit(username: string, centsAmount: number): Deposit {
+  return {
+    kind: "DEPOSIT",
+    destination: `${username}`,
+    centsAmount: centsAmount,
+    createdAt: new Date(),
+  };
+}
+
+export function makeWithdrawal(
+  username: string,
+
+  centsAmount: number
+): Withdrawal {
+  return {
+    kind: "WITHDRAWAL",
+    source: username,
+    centsAmount: centsAmount,
+    createdAt: new Date(),
+  };
+}
+
+export function makePayment(
+  payer: string,
+  destination: string,
+  centsAmount: number,
+  description = ""
+): Payment {
+  return {
+    kind: "PAYMENT",
+    source: payer,
+    destination: destination,
+    centsAmount: centsAmount,
+    description: description,
+    createdAt: new Date(),
+  };
+}
+
+export function calculateBalance(transactions: Transaction[]) {
+  return transactions.reduce(
+    (acc, current) =>
+      current.kind === "DEPOSIT"
+        ? acc + current.centsAmount
+        : acc - current.centsAmount,
+    0
+  );
+}
+
+export class InsufficientFundsError extends Error {
+  constructor(username: string, balance: number, centsAmount: number) {
+    super(
+      `${username} tried to subtract ${centsAmount} from account, but it only has ${balance}`
     );
-  }
-
-  public async save() {}
-
-  static fromObject(obj: {
-    type: TransactionType;
-    centsAmount: number;
-    destination: string;
-  }) {
-    return new Transaction(obj["type"], obj["centsAmount"], "", destination);
-  }
-
-  // Explicar pq o construtor é privado
-  private constructor(
-    type: TransactionType,
-    centsAmount: number,
-    source?: string,
-    destination?: string,
-    description?: string,
-    createdAt: Date = new Date()
-  ) {
-    this.type = type;
-    this.centsAmount = centsAmount;
-    this.source = source;
-    this.destination = destination;
-    this.description = description;
-    this.createdAt = createdAt;
   }
 }

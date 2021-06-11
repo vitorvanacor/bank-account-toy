@@ -1,6 +1,12 @@
 import { MongoClient } from "mongodb";
 
-export const client = new MongoClient("mongodb://admin:admin@db:27017", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+import config from "../config";
+const { USERNAME, PASSWORD, HOST, PORT } = config.DB;
+
+export const client = new MongoClient(
+  `mongodb://${USERNAME}:${PASSWORD}@${HOST}:${PORT}`,
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
+);

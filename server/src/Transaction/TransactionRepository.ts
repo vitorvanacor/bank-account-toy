@@ -1,16 +1,26 @@
-import * as db from "../lib/db";
-import Transaction from "./Transaction";
+import Repository from "../lib/Repository";
+import { Transaction } from "./Transaction";
 
-export default class TransactionRepository {
-  static collection() {
-    return db.client.db().collection("transactions");
+export default class TransactionRepository extends Repository {
+  static collectionName() {
+    return "transactions";
   }
 
   static async insert(transaction: Transaction) {
     return await this.collection().insertOne(transaction);
   }
 
-  static async find(query: Object): Promise<Transaction> {
+  static async find(query: object): Promise<Transaction> {
+    // TODO: Validate that the found object is a Transaction
     return await this.collection().findOne(query);
+  }
+
+  static async getHistory(username: string): Promise<Transaction[]> {
+    const cursor = this.collection()
+      .find({
+        $or: [{ source: username }, { destination: username }],
+      })
+      .sort({ createdAt: -1 });
+    return await cursor.toArray();
   }
 }
